@@ -22,3 +22,18 @@ jobs:
 
       - name: Run tests
         run: docker run -e CI=true martinshishkov/docker-react npm run test -- --coverage
+
+      - name: Generate deployment package
+        run: zip -r deploy.zip . -x '*.git*'
+
+      - name: Deploy to ElasticBeanstalk
+        uses: einaregilsson/beanstalk-deploy@v18
+        with:
+          application_name: docker-react
+          environment_name: Docker-react-env
+          existing_bucket_name: elasticbeanstalk-eu-central-1-590183831205
+          region: eu-central-1
+          version_label: ${{ github.sha }}
+          deployment_package: deploy.zip
+          access_key_id: ${{ secrets.AWS_ACCESS_KEY }}
+          secret_access_key: ${{ secrets.AWS_SECRET_KEY }}
